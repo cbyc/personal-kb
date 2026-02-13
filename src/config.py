@@ -1,0 +1,33 @@
+"""Configuration management using pydantic-settings."""
+
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class Settings(BaseSettings):
+    """Application configuration loaded from environment variables and .env file."""
+
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+
+    # LLM
+    llm_model: str = "google-gla:gemini-2.0-flash"
+
+    # Embeddings
+    embedding_model: str = "sentence-transformers/all-MiniLM-L6-v2"
+    embedding_dimension: int = 384
+
+    # Qdrant
+    qdrant_url: str = "http://localhost:6333"
+    qdrant_collection: str = "personal_kb"
+    qdrant_use_memory: bool = True
+
+    # Chunking
+    chunk_size: int = 500
+    chunk_overlap: int = 50
+
+    # Data
+    notes_dir: str = "data/notes"
+
+
+def get_settings() -> Settings:
+    """Factory function for settings (enables test overrides)."""
+    return Settings()

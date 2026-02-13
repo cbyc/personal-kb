@@ -1,0 +1,57 @@
+Machine Learning Study Notes
+
+Chapter 1: Fundamentals
+
+Supervised Learning:
+Supervised learning uses labeled training data to learn a mapping
+from inputs to outputs. Common algorithms include:
+- Linear Regression: predicts continuous values
+- Logistic Regression: predicts binary outcomes
+- Decision Trees: splits data based on feature thresholds
+- Random Forests: ensemble of decision trees
+
+Unsupervised Learning:
+Finds patterns in unlabeled data. Key techniques:
+- K-Means Clustering: groups similar data points
+- PCA (Principal Component Analysis): dimensionality reduction
+- Autoencoders: neural networks for feature learning
+
+Chapter 2: Gradient Descent
+
+Gradient descent is an optimization algorithm used to minimize the loss function.
+It works by iteratively adjusting model parameters in the direction of
+steepest descent of the loss function.
+
+The update rule is: w = w - learning_rate * gradient
+
+Types of gradient descent:
+1. Batch Gradient Descent: uses entire dataset per update (slow but stable)
+2. Stochastic Gradient Descent (SGD): uses one sample per update (fast but noisy)
+3. Mini-batch Gradient Descent: uses a subset of data (best of both worlds)
+
+Learning Rate:
+- Too high: overshoots minimum, may diverge
+- Too low: very slow convergence
+- Adaptive methods: Adam, RMSprop, Adagrad automatically adjust the learning rate
+
+Chapter 3: Neural Networks
+
+A neural network consists of layers of interconnected nodes (neurons).
+- Input layer: receives the raw features
+- Hidden layers: learn intermediate representations
+- Output layer: produces the prediction
+
+Activation functions:
+- ReLU: f(x) = max(0, x) - most common for hidden layers
+- Sigmoid: f(x) = 1/(1+e^(-x)) - used for binary classification
+- Softmax: converts outputs to probabilities for multi-class classification
+
+Backpropagation:
+The algorithm for training neural networks uses the chain rule of calculus
+to compute gradients layer by layer, from output back to input.
+This allows efficient computation of how each weight contributes to the error.
+
+Common architectures:
+- CNNs (Convolutional Neural Networks): image processing
+- RNNs (Recurrent Neural Networks): sequential data
+- Transformers: attention-based, state-of-the-art for NLP tasks

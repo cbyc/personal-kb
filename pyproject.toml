@@ -1,7 +1,29 @@
 [project]
 name = "personal-kb"
 version = "0.1.0"
-description = "Add your description here"
+description = "Personal knowledge base with RAG using pydantic-ai"
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = []
+dependencies = [
+    "pydantic-ai",
+    "pydantic-evals",
+    "pydantic-settings",
+    "qdrant-client",
+    "sentence-transformers",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-asyncio",
+    "ruff",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py", "eval_*.py"]
+python_functions = ["test_*"]
+asyncio_mode = "auto"
+
+[tool.ruff]
+line-length = 100

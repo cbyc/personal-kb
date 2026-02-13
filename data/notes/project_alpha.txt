@@ -1,0 +1,41 @@
+Project Alpha - Internal Planning Document
+
+Project Alpha is a customer-facing web application for inventory management.
+The project was initiated on January 15, 2024 by the engineering team.
+
+Team Members:
+- Sarah Chen (Tech Lead)
+- Marcus Johnson (Backend Developer)
+- Priya Patel (Frontend Developer)
+- Alex Rivera (QA Engineer)
+
+Key Deadlines:
+- MVP deadline: March 30, 2024
+- Beta release: May 15, 2024
+- Production launch: July 1, 2024
+
+Technology Stack:
+- Backend: Python with FastAPI
+- Frontend: React with TypeScript
+- Database: PostgreSQL
+- Cache: Redis
+- Deployment: Kubernetes on AWS
+
+Architecture Decisions:
+The team decided to use a microservices architecture with three main services:
+1. Inventory Service - handles CRUD operations for inventory items
+2. Notification Service - sends alerts when stock is low
+3. Reporting Service - generates inventory reports
+
+The API follows REST conventions with OpenAPI documentation.
+Authentication uses OAuth 2.0 with JWT tokens.
+
+Current Status:
+As of February 2024, the Inventory Service is 70% complete.
+The team is blocked on the database migration strategy.
+Marcus is evaluating whether to use Alembic or custom migration scripts.
+
+Risks:
+- Database migration complexity could delay the MVP
+- Third-party API integration with suppliers is behind schedule
+- Performance testing has not yet started
