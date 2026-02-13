@@ -2,7 +2,7 @@
 
 import sys
 
-from src.agent import KBDeps, ask
+from src.agent import KBAgent, KBDeps
 from src.config import get_settings
 from src.document_loader import load_and_chunk
 from src.embeddings import EmbeddingModel
@@ -32,13 +32,14 @@ def main():
     vectorstore.add_chunks(chunks, embeddings)
 
     deps = KBDeps(vectorstore=vectorstore, embedding_model=embedding_model)
+    agent = KBAgent(deps)
 
     print(f"Loaded {len(chunks)} chunks. Ready for questions!")
 
     # Single query mode via CLI argument
     if len(sys.argv) > 1:
         question = " ".join(sys.argv[1:])
-        answer = ask(question, deps)
+        answer = agent.ask(question)
         print(f"\n{answer}")
         return
 
@@ -50,7 +51,7 @@ def main():
             break
         if not question:
             continue
-        answer = ask(question, deps)
+        answer = agent.ask(question)
         print(f"\nKB: {answer}\n")
 
 

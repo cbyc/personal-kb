@@ -24,72 +24,80 @@ class KBDeps:
     embedding_model: EmbeddingModel
 
 
-def create_agent():
-    """Create the RAG agent. Separated to avoid import-time model validation.
+class KBAgent:
+    """Personal knowledge base agent.
 
-    Returns:
-        A configured pydantic-ai Agent with the retrieve tool.
+    Creates the underlying pydantic-ai agent once at construction time
+    and reuses it across all queries.
     """
-    from pydantic_ai import Agent, RunContext
 
-    settings = get_settings()
-    agent = Agent(
-        settings.llm_model,
-        deps_type=KBDeps,
-        system_prompt=SYSTEM_PROMPT,
-    )
+    def __init__(self, deps: KBDeps):
+        self._agent = self._create_agent()
+        self._deps = deps
 
-    @agent.tool
-    def retrieve(ctx: RunContext[KBDeps], query: str) -> str:
-        """Search the knowledge base for information relevant to the query.
+    @staticmethod
+    def _create_agent():
+        """Create the pydantic-ai Agent.
 
-        Args:
-            ctx: The run context with dependencies.
-            query: The search query.
+        Uses a deferred import to avoid import-time model validation.
 
         Returns:
-            Formatted string of relevant chunks with their sources.
+            A configured pydantic-ai Agent with the retrieve tool.
         """
-        deps = ctx.deps
-        query_embedding = deps.embedding_model.embed_text(query)
-        results = deps.vectorstore.search(query_embedding, top_k=5)
+        from pydantic_ai import Agent, RunContext
 
-        if not results:
-            return "No relevant information found in the knowledge base."
+        settings = get_settings()
+        agent = Agent(
+            settings.llm_model,
+            deps_type=KBDeps,
+            system_prompt=SYSTEM_PROMPT,
+        )
 
-        formatted = []
-        for r in results:
-            formatted.append(f"[Source: {r.chunk.source}]\n{r.chunk.text}")
-        return "\n\n---\n\n".join(formatted)
+        @agent.tool
+        def retrieve(ctx: RunContext[KBDeps], query: str) -> str:
+            """Search the knowledge base for information relevant to the query.
 
-    return agent
+            Args:
+                ctx: The run context with dependencies.
+                query: The search query.
 
+            Returns:
+                Formatted string of relevant chunks with their sources.
+            """
+            deps = ctx.deps
+            query_embedding = deps.embedding_model.embed_text(query)
+            results = deps.vectorstore.search(query_embedding, top_k=5)
 
-async def ask_async(question: str, deps: KBDeps) -> str:
-    """Ask a question to the knowledge base agent (async version).
+            if not results:
+                return "No relevant information found in the knowledge base."
 
-    Args:
-        question: The user's question.
-        deps: The agent dependencies (vectorstore + embedding model).
+            formatted = []
+            for r in results:
+                formatted.append(f"[Source: {r.chunk.source}]\n{r.chunk.text}")
+            return "\n\n---\n\n".join(formatted)
 
-    Returns:
-        The agent's answer as a string.
-    """
-    agent = create_agent()
-    result = await agent.run(question, deps=deps)
-    return result.output
+        return agent
 
+    async def ask_async(self, question: str) -> str:
+        """Ask a question (async version).
 
-def ask(question: str, deps: KBDeps) -> str:
-    """Ask a question to the knowledge base agent (sync wrapper).
+        Args:
+            question: The user's question.
 
-    Args:
-        question: The user's question.
-        deps: The agent dependencies (vectorstore + embedding model).
+        Returns:
+            The agent's answer as a string.
+        """
+        result = await self._agent.run(question, deps=self._deps)
+        return result.output
 
-    Returns:
-        The agent's answer as a string.
-    """
-    agent = create_agent()
-    result = agent.run_sync(question, deps=deps)
-    return result.output
+    def ask(self, question: str) -> str:
+        """Ask a question (sync version).
+
+        Args:
+            question: The user's question.
+
+        Returns:
+            The agent's answer as a string.
+        """
+        result = self._agent.run_sync(question, deps=self._deps)
+        return result.output

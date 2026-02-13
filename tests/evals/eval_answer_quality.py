@@ -8,7 +8,7 @@ Tests that the agent correctly declines to answer out-of-scope questions.
 from pydantic_evals import Case, Dataset
 from pydantic_evals.evaluators import LLMJudge
 
-from src.agent import KBDeps, ask_async
+from src.agent import KBAgent, KBDeps
 from src.config import get_settings
 from src.document_loader import load_and_chunk
 from src.embeddings import EmbeddingModel
@@ -27,9 +27,10 @@ def _build_ask_task():
     embeddings = model.embed_texts([c.text for c in chunks])
     store.add_chunks(chunks, embeddings)
     deps = KBDeps(vectorstore=store, embedding_model=model)
+    agent = KBAgent(deps)
 
     async def ask_question(question: str) -> str:
-        return await ask_async(question, deps)
+        return await agent.ask_async(question)
 
     return ask_question
 
