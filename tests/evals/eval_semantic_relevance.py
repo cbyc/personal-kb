@@ -75,9 +75,8 @@ semantic_relevance_dataset = Dataset(
             evaluators=[
                 LLMJudge(
                     rubric=(
-                        "The retrieved text contains information about Project Alpha's "
-                        "technology stack or programming languages, and does NOT contain "
-                        "unrelated content like recipes or ML theory."
+                        "The retrieved text is primarily about Project Alpha "
+                        "and does NOT contain unrelated content like recipes or ML theory."
                     ),
                     model=JUDGE_MODEL,
                     include_input=True,
