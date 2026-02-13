@@ -27,6 +27,9 @@ class Settings(BaseSettings):
     # Data
     notes_dir: str = "data/notes"
 
+    # Input validation
+    max_query_length: int = 1000
+
 
 def get_settings() -> Settings:
     """Factory function for settings (enables test overrides)."""
