@@ -55,9 +55,12 @@ class VectorStore:
         """
         points = []
         for chunk, embedding in zip(chunks, embeddings):
+            point_id = str(
+                uuid.uuid5(uuid.NAMESPACE_DNS, f"{chunk.source}:{chunk.chunk_index}:{chunk.text}")
+            )
             points.append(
                 PointStruct(
-                    id=str(uuid.uuid4()),
+                    id=point_id,
                     vector=embedding,
                     payload={
                         "text": chunk.text,
