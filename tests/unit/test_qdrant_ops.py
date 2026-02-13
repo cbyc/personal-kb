@@ -68,6 +68,21 @@ class TestVectorStore:
         scores = [r.score for r in results]
         assert scores == sorted(scores, reverse=True)
 
+    def test_search_score_threshold_filters_low_scores(
+        self, sample_chunks: list[Chunk], sample_embeddings: list[list[float]]
+    ):
+        """Results below score_threshold should be filtered out."""
+        store = VectorStore(use_memory=True)
+        store.ensure_collection()
+        store.add_chunks(sample_chunks, sample_embeddings)
+        # With threshold=0.0, all results returned.
+        all_results = store.search(sample_embeddings[0], top_k=3, score_threshold=0.0)
+        # With a very high threshold, low-scoring results are excluded.
+        filtered = store.search(sample_embeddings[0], top_k=3, score_threshold=0.99)
+        assert len(filtered) <= len(all_results)
+        for r in filtered:
+            assert r.score >= 0.99
+
     def test_search_empty_collection(self):
         """Searching an empty collection should return empty list."""
         store = VectorStore(use_memory=True)

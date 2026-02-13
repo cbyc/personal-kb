@@ -74,7 +74,11 @@ class KBAgent:
             """
             deps = ctx.deps
             query_embedding = deps.embedding_model.embed_text(query)
-            results = deps.vectorstore.search(query_embedding, top_k=5)
+            results = deps.vectorstore.search(
+                query_embedding,
+                top_k=5,
+                score_threshold=settings.search_score_threshold,
+            )
 
             # Store results for QueryResult construction.
             deps.last_results = results

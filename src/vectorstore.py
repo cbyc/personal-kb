@@ -72,12 +72,18 @@ class VectorStore:
             )
         self._client.upsert(collection_name=self._collection_name, points=points)
 
-    def search(self, query_embedding: list[float], top_k: int = 5) -> list[SearchResult]:
+    def search(
+        self,
+        query_embedding: list[float],
+        top_k: int = 5,
+        score_threshold: float = 0.0,
+    ) -> list[SearchResult]:
         """Search for similar chunks by embedding.
 
         Args:
             query_embedding: The query embedding vector.
             top_k: Number of results to return.
+            score_threshold: Minimum relevance score. Results below this are filtered out.
 
         Returns:
             List of SearchResult objects sorted by relevance (descending score).
@@ -90,6 +96,8 @@ class VectorStore:
 
         search_results = []
         for point in results:
+            if point.score < score_threshold:
+                continue
             payload = point.payload
             chunk = Chunk(
                 text=payload["text"],

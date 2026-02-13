@@ -19,6 +19,7 @@ class Settings(BaseSettings):
     qdrant_url: str = "http://localhost:6333"
     qdrant_collection: str = "personal_kb"
     qdrant_use_memory: bool = True
+    search_score_threshold: float = 0.1
 
     # Chunking
     chunk_size: int = 500
