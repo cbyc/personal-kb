@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass
 
+from src.config import get_settings
 from src.embeddings import EmbeddingModel
 from src.vectorstore import VectorStore
 
@@ -31,8 +32,9 @@ def create_agent():
     """
     from pydantic_ai import Agent, RunContext
 
+    settings = get_settings()
     agent = Agent(
-        "google-gla:gemini-2.0-flash",
+        settings.llm_model,
         deps_type=KBDeps,
         system_prompt=SYSTEM_PROMPT,
     )
