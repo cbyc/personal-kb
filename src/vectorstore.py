@@ -1,5 +1,10 @@
 """Qdrant vector store operations."""
 
+import uuid
+
+from qdrant_client import QdrantClient
+from qdrant_client.models import Distance, PointStruct, VectorParams
+
 from src.models import Chunk, SearchResult
 
 
@@ -21,11 +26,25 @@ class VectorStore:
             use_memory: Use in-memory storage for development/testing.
             embedding_dimension: Dimension of the embedding vectors.
         """
-        raise NotImplementedError("VectorStore.__init__ not yet implemented")
+        self._collection_name = collection_name
+        self._embedding_dimension = embedding_dimension
+
+        if use_memory:
+            self._client = QdrantClient(location=":memory:")
+        else:
+            self._client = QdrantClient(url=url)
 
     def ensure_collection(self) -> None:
         """Create collection if it doesn't exist."""
-        raise NotImplementedError("ensure_collection not yet implemented")
+        collections = self._client.get_collections().collections
+        if not any(c.name == self._collection_name for c in collections):
+            self._client.create_collection(
+                collection_name=self._collection_name,
+                vectors_config=VectorParams(
+                    size=self._embedding_dimension,
+                    distance=Distance.COSINE,
+                ),
+            )
 
     def add_chunks(self, chunks: list[Chunk], embeddings: list[list[float]]) -> None:
         """Add chunks with their embeddings to the vector store.
@@ -34,7 +53,21 @@ class VectorStore:
             chunks: List of text chunks to store.
             embeddings: Corresponding embedding vectors.
         """
-        raise NotImplementedError("add_chunks not yet implemented")
+        points = []
+        for chunk, embedding in zip(chunks, embeddings):
+            points.append(
+                PointStruct(
+                    id=str(uuid.uuid4()),
+                    vector=embedding,
+                    payload={
+                        "text": chunk.text,
+                        "source": chunk.source,
+                        "chunk_index": chunk.chunk_index,
+                        "metadata": chunk.metadata,
+                    },
+                )
+            )
+        self._client.upsert(collection_name=self._collection_name, points=points)
 
     def search(self, query_embedding: list[float], top_k: int = 5) -> list[SearchResult]:
         """Search for similar chunks by embedding.
@@ -44,10 +77,27 @@ class VectorStore:
             top_k: Number of results to return.
 
         Returns:
-            List of SearchResult objects sorted by relevance.
+            List of SearchResult objects sorted by relevance (descending score).
         """
-        raise NotImplementedError("search not yet implemented")
+        results = self._client.query_points(
+            collection_name=self._collection_name,
+            query=query_embedding,
+            limit=top_k,
+        ).points
+
+        search_results = []
+        for point in results:
+            payload = point.payload
+            chunk = Chunk(
+                text=payload["text"],
+                source=payload["source"],
+                chunk_index=payload["chunk_index"],
+                metadata=payload.get("metadata", {}),
+            )
+            search_results.append(SearchResult(chunk=chunk, score=point.score))
+
+        return search_results
 
     def delete_collection(self) -> None:
         """Delete the collection (for cleanup in tests)."""
-        raise NotImplementedError("delete_collection not yet implemented")
+        self._client.delete_collection(collection_name=self._collection_name)

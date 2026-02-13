@@ -48,13 +48,23 @@ def create_agent():
         Returns:
             Formatted string of relevant chunks with their sources.
         """
-        raise NotImplementedError("retrieve tool not yet implemented")
+        deps = ctx.deps
+        query_embedding = deps.embedding_model.embed_text(query)
+        results = deps.vectorstore.search(query_embedding, top_k=5)
+
+        if not results:
+            return "No relevant information found in the knowledge base."
+
+        formatted = []
+        for r in results:
+            formatted.append(f"[Source: {r.chunk.source}]\n{r.chunk.text}")
+        return "\n\n---\n\n".join(formatted)
 
     return agent
 
 
-def ask(question: str, deps: KBDeps) -> str:
-    """Ask a question to the knowledge base agent.
+async def ask_async(question: str, deps: KBDeps) -> str:
+    """Ask a question to the knowledge base agent (async version).
 
     Args:
         question: The user's question.
@@ -63,4 +73,21 @@ def ask(question: str, deps: KBDeps) -> str:
     Returns:
         The agent's answer as a string.
     """
-    raise NotImplementedError("ask not yet implemented")
+    agent = create_agent()
+    result = await agent.run(question, deps=deps)
+    return result.output
+
+
+def ask(question: str, deps: KBDeps) -> str:
+    """Ask a question to the knowledge base agent (sync wrapper).
+
+    Args:
+        question: The user's question.
+        deps: The agent dependencies (vectorstore + embedding model).
+
+    Returns:
+        The agent's answer as a string.
+    """
+    agent = create_agent()
+    result = agent.run_sync(question, deps=deps)
+    return result.output

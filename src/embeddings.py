@@ -1,5 +1,7 @@
 """Embedding generation using sentence-transformers."""
 
+from sentence_transformers import SentenceTransformer
+
 
 class EmbeddingModel:
     """Wrapper around sentence-transformers for generating embeddings."""
@@ -10,7 +12,7 @@ class EmbeddingModel:
         Args:
             model_name: HuggingFace model identifier.
         """
-        raise NotImplementedError("EmbeddingModel.__init__ not yet implemented")
+        self._model = SentenceTransformer(model_name)
 
     def embed_text(self, text: str) -> list[float]:
         """Generate embedding for a single text string.
@@ -21,7 +23,8 @@ class EmbeddingModel:
         Returns:
             List of floats representing the embedding vector.
         """
-        raise NotImplementedError("embed_text not yet implemented")
+        embedding = self._model.encode(text)
+        return embedding.tolist()
 
     def embed_texts(self, texts: list[str]) -> list[list[float]]:
         """Generate embeddings for multiple text strings.
@@ -32,9 +35,12 @@ class EmbeddingModel:
         Returns:
             List of embedding vectors.
         """
-        raise NotImplementedError("embed_texts not yet implemented")
+        if not texts:
+            return []
+        embeddings = self._model.encode(texts)
+        return [e.tolist() for e in embeddings]
 
     @property
     def dimension(self) -> int:
         """Return the embedding dimension."""
-        raise NotImplementedError("dimension not yet implemented")
+        return self._model.get_sentence_embedding_dimension()

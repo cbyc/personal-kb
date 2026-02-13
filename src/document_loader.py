@@ -13,8 +13,25 @@ def load_documents(directory: str | Path) -> list[Document]:
 
     Returns:
         List of Document objects with content and source metadata.
+
+    Raises:
+        FileNotFoundError: If the directory does not exist.
     """
-    raise NotImplementedError("load_documents not yet implemented")
+    dir_path = Path(directory)
+    if not dir_path.exists():
+        raise FileNotFoundError(f"Directory not found: {dir_path}")
+
+    documents = []
+    for file_path in sorted(dir_path.glob("*.txt")):
+        content = file_path.read_text(encoding="utf-8")
+        documents.append(
+            Document(
+                content=content,
+                source=file_path.name,
+                title=file_path.stem,
+            )
+        )
+    return documents
 
 
 def chunk_document(
@@ -32,7 +49,30 @@ def chunk_document(
     Returns:
         List of Chunk objects with text, source, and index.
     """
-    raise NotImplementedError("chunk_document not yet implemented")
+    text = document.content
+    if not text:
+        return []
+
+    chunks = []
+    start = 0
+    chunk_index = 0
+
+    while start < len(text):
+        end = start + chunk_size
+        chunk_text = text[start:end]
+
+        chunks.append(
+            Chunk(
+                text=chunk_text,
+                source=document.source,
+                chunk_index=chunk_index,
+            )
+        )
+
+        chunk_index += 1
+        start += chunk_size - chunk_overlap
+
+    return chunks
 
 
 def load_and_chunk(
@@ -50,4 +90,8 @@ def load_and_chunk(
     Returns:
         List of all Chunk objects from all documents.
     """
-    raise NotImplementedError("load_and_chunk not yet implemented")
+    documents = load_documents(directory)
+    all_chunks = []
+    for doc in documents:
+        all_chunks.extend(chunk_document(doc, chunk_size, chunk_overlap))
+    return all_chunks
