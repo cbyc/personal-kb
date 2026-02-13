@@ -41,8 +41,8 @@ def main():
     # Single query mode via CLI argument
     if len(sys.argv) > 1:
         question = " ".join(sys.argv[1:])
-        answer = agent.ask(question)
-        print(f"\n{answer}")
+        result = agent.ask(question)
+        print(f"\n{result.answer}")
         return
 
     # Interactive mode
@@ -53,8 +53,8 @@ def main():
             break
         if not question:
             continue
-        answer = agent.ask(question)
-        print(f"\nKB: {answer}\n")
+        result = agent.ask(question)
+        print(f"\nKB: {result.answer}\n")
 
 
 if __name__ == "__main__":

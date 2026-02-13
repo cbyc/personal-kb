@@ -32,4 +32,3 @@ class QueryResult(BaseModel):
 
     answer: str
     sources: list[SearchResult] = Field(default_factory=list)
-    query: str

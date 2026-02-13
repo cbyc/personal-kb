@@ -1,9 +1,10 @@
 """Pydantic AI RAG agent for the personal knowledge base."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from src.config import get_settings
 from src.embeddings import EmbeddingModel
+from src.models import QueryResult, SearchResult
 from src.vectorstore import VectorStore
 
 SYSTEM_PROMPT = (
@@ -27,6 +28,7 @@ class KBDeps:
 
     vectorstore: VectorStore
     embedding_model: EmbeddingModel
+    last_results: list[SearchResult] = field(default_factory=list)
 
 
 class KBAgent:
@@ -74,6 +76,9 @@ class KBAgent:
             query_embedding = deps.embedding_model.embed_text(query)
             results = deps.vectorstore.search(query_embedding, top_k=5)
 
+            # Store results for QueryResult construction.
+            deps.last_results = results
+
             if not results:
                 return "No relevant information found in the knowledge base."
 
@@ -99,34 +104,36 @@ class KBAgent:
                 f"Maximum allowed: {self._max_query_length} chars."
             )
 
-    async def ask_async(self, question: str) -> str:
+    async def ask_async(self, question: str) -> QueryResult:
         """Ask a question (async version).
 
         Args:
             question: The user's question.
 
         Returns:
-            The agent's answer as a string.
+            A QueryResult with the answer and source documents.
 
         Raises:
             ValueError: If the query exceeds the maximum allowed length.
         """
         self._validate_query(question)
+        self._deps.last_results = []
         result = await self._agent.run(question, deps=self._deps)
-        return result.output
+        return QueryResult(answer=result.output, sources=self._deps.last_results)
 
-    def ask(self, question: str) -> str:
+    def ask(self, question: str) -> QueryResult:
         """Ask a question (sync version).
 
         Args:
             question: The user's question.
 
         Returns:
-            The agent's answer as a string.
+            A QueryResult with the answer and source documents.
 
         Raises:
             ValueError: If the query exceeds the maximum allowed length.
         """
         self._validate_query(question)
+        self._deps.last_results = []
         result = self._agent.run_sync(question, deps=self._deps)
-        return result.output
+        return QueryResult(answer=result.output, sources=self._deps.last_results)

@@ -30,7 +30,8 @@ def _build_ask_task():
     agent = KBAgent(deps)
 
     async def ask_question(question: str) -> str:
-        return await agent.ask_async(question)
+        result = await agent.ask_async(question)
+        return result.answer
 
     return ask_question
 
