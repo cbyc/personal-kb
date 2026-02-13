@@ -7,25 +7,17 @@ Uses Contains evaluator to check source file names appear in results.
 from pydantic_evals import Case, Dataset
 from pydantic_evals.evaluators import Contains
 
-from src.config import get_settings
-from src.document_loader import load_and_chunk
-from src.embeddings import EmbeddingModel
-from src.vectorstore import VectorStore
+from src.pipeline import build_pipeline
 
 
 def _build_retrieval_task():
     """Build retrieval pipeline once, return a task function that queries it."""
-    settings = get_settings()
-    chunks = load_and_chunk(settings.notes_dir, settings.chunk_size, settings.chunk_overlap)
-    model = EmbeddingModel(model_name=settings.embedding_model)
-    store = VectorStore(use_memory=True, embedding_dimension=settings.embedding_dimension)
-    store.ensure_collection()
-    embeddings = model.embed_texts([c.text for c in chunks])
-    store.add_chunks(chunks, embeddings)
+    agent = build_pipeline()
+    deps = agent.deps
 
     def retrieve_for_query(query: str) -> str:
-        query_embedding = model.embed_text(query)
-        results = store.search(query_embedding, top_k=3)
+        query_embedding = deps.embedding_model.embed_text(query)
+        results = deps.vectorstore.search(query_embedding, top_k=3)
         return "\n".join(f"[Source: {r.chunk.source}] {r.chunk.text}" for r in results)
 
     return retrieve_for_query

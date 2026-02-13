@@ -43,6 +43,11 @@ class KBAgent:
         self._deps = deps
         self._max_query_length = get_settings().max_query_length
 
+    @property
+    def deps(self) -> KBDeps:
+        """Access the agent's dependencies (vectorstore, embedding model)."""
+        return self._deps
+
     @staticmethod
     def _create_agent():
         """Create the pydantic-ai Agent.

@@ -8,26 +8,14 @@ Tests that the agent correctly declines to answer out-of-scope questions.
 from pydantic_evals import Case, Dataset
 from pydantic_evals.evaluators import LLMJudge
 
-from src.agent import KBAgent, KBDeps
-from src.config import get_settings
-from src.document_loader import load_and_chunk
-from src.embeddings import EmbeddingModel
-from src.vectorstore import VectorStore
+from src.pipeline import build_pipeline
 
 JUDGE_MODEL = "google-gla:gemini-2.0-flash"
 
 
 def _build_ask_task():
     """Build full RAG pipeline once, return an async task function that answers questions."""
-    settings = get_settings()
-    chunks = load_and_chunk(settings.notes_dir, settings.chunk_size, settings.chunk_overlap)
-    model = EmbeddingModel(model_name=settings.embedding_model)
-    store = VectorStore(use_memory=True, embedding_dimension=settings.embedding_dimension)
-    store.ensure_collection()
-    embeddings = model.embed_texts([c.text for c in chunks])
-    store.add_chunks(chunks, embeddings)
-    deps = KBDeps(vectorstore=store, embedding_model=model)
-    agent = KBAgent(deps)
+    agent = build_pipeline()
 
     async def ask_question(question: str) -> str:
         result = await agent.ask_async(question)
