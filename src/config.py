@@ -30,6 +30,10 @@ class Settings(BaseSettings):
     # Input validation
     max_query_length: int = 1000
 
+    # Tracing
+    tracing_enabled: bool = False
+    phoenix_endpoint: str = "http://127.0.0.1:6006/v1/traces"
+
 
 def get_settings() -> Settings:
     """Factory function for settings (enables test overrides)."""

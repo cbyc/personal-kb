@@ -10,6 +10,8 @@ dependencies = [
     "pydantic-settings",
     "qdrant-client",
     "sentence-transformers",
+    "opentelemetry-sdk",
+    "opentelemetry-exporter-otlp",
 ]
 
 [project.optional-dependencies]
@@ -17,6 +19,7 @@ dev = [
     "pytest",
     "pytest-asyncio",
     "ruff",
+    "arize-phoenix",
 ]
 
 [tool.pytest.ini_options]

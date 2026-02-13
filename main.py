@@ -6,12 +6,14 @@ from src.agent import KBAgent, KBDeps
 from src.config import get_settings
 from src.document_loader import load_and_chunk
 from src.embeddings import EmbeddingModel
+from src.tracing import setup_tracing
 from src.vectorstore import VectorStore
 
 
 def main():
     """Run the personal KB CLI."""
     settings = get_settings()
+    setup_tracing()
 
     print("Personal KB - Second Brain")
     print("Loading knowledge base...")
