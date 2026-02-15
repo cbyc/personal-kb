@@ -7,6 +7,7 @@ Uses LLMJudge to assess whether the retrieved content actually addresses the que
 from pydantic_evals import Case, Dataset
 from pydantic_evals.evaluators import LLMJudge
 
+from src.config import get_settings
 from src.pipeline import build_pipeline
 
 JUDGE_MODEL = "google-gla:gemini-2.0-flash"
@@ -14,7 +15,8 @@ JUDGE_MODEL = "google-gla:gemini-2.0-flash"
 
 def _build_retrieval_task():
     """Build retrieval pipeline once, return a task function that queries it."""
-    agent = build_pipeline()
+    settings = get_settings()
+    agent = build_pipeline(settings)
     deps = agent.deps
 
     def retrieve_for_query(query: str) -> str:

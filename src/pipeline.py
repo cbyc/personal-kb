@@ -11,7 +11,7 @@ from src.embeddings import EmbeddingModel
 from src.vectorstore import VectorStore
 
 
-def build_pipeline(settings: Settings | None = None) -> KBAgent:
+def build_pipeline(settings: Settings) -> KBAgent:
     """Build the full RAG pipeline: load, chunk, embed, index, and create agent.
 
     Args:
@@ -22,8 +22,6 @@ def build_pipeline(settings: Settings | None = None) -> KBAgent:
         The underlying deps (vectorstore, embedding_model) are accessible
         via agent.deps.
     """
-    if settings is None:
-        settings = get_settings()
 
     embedding_model = EmbeddingModel(model_name=settings.embedding_model)
     vectorstore = VectorStore(

@@ -7,12 +7,14 @@ Uses Contains evaluator to check source file names appear in results.
 from pydantic_evals import Case, Dataset
 from pydantic_evals.evaluators import Contains
 
+from src.config import get_settings
 from src.pipeline import build_pipeline
 
 
 def _build_retrieval_task():
     """Build retrieval pipeline once, return a task function that queries it."""
-    agent = build_pipeline()
+    settings = get_settings()
+    agent = build_pipeline(settings)
     deps = agent.deps
 
     def retrieve_for_query(query: str) -> str:

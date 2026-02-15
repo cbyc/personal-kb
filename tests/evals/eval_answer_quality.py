@@ -8,6 +8,7 @@ Tests that the agent correctly declines to answer out-of-scope questions.
 from pydantic_evals import Case, Dataset
 from pydantic_evals.evaluators import LLMJudge
 
+from src.config import get_settings
 from src.pipeline import build_pipeline
 
 JUDGE_MODEL = "google-gla:gemini-2.0-flash"
@@ -15,7 +16,8 @@ JUDGE_MODEL = "google-gla:gemini-2.0-flash"
 
 def _build_ask_task():
     """Build full RAG pipeline once, return an async task function that answers questions."""
-    agent = build_pipeline()
+    settings = get_settings()
+    agent = build_pipeline(settings)
 
     async def ask_question(question: str) -> str:
         result = await agent.ask_async(question)
