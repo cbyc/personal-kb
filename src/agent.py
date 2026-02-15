@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass, field
 
+from src.agents.retrieval import RetrievalAgent, RetrievalDeps
 from src.config import get_settings
 from src.embeddings import EmbeddingModel
 from src.models import KBResponse, QueryResult, SearchResult
@@ -31,6 +32,7 @@ class KBDeps:
 
     vectorstore: VectorStore
     embedding_model: EmbeddingModel
+    retrieval_agent: RetrievalAgent | None = None
     last_results: list[SearchResult] = field(default_factory=list)
 
 
@@ -38,13 +40,22 @@ class KBAgent:
     """Personal knowledge base agent.
 
     Creates the underlying pydantic-ai agent once at construction time
-    and reuses it across all queries.
+    and reuses it across all queries. Delegates retrieval to a
+    dedicated RetrievalAgent.
     """
 
     def __init__(self, deps: KBDeps):
         self._agent = self._create_agent()
         self._deps = deps
         self._max_query_length = get_settings().max_query_length
+
+        # Create retrieval agent if not provided via deps
+        if self._deps.retrieval_agent is None:
+            retrieval_deps = RetrievalDeps(
+                vectorstore=deps.vectorstore,
+                embedding_model=deps.embedding_model,
+            )
+            self._deps.retrieval_agent = RetrievalAgent(retrieval_deps)
 
     @property
     def deps(self) -> KBDeps:
@@ -82,26 +93,13 @@ class KBAgent:
                 Formatted string of relevant chunks with their sources.
             """
             deps = ctx.deps
-            query_embedding = deps.embedding_model.embed_text(query)
-            results = deps.vectorstore.search(
-                query_embedding,
-                top_k=5,
-                score_threshold=settings.search_score_threshold,
-            )
+            retrieval = deps.retrieval_agent
+            results = retrieval.search(query)
 
             # Store results for QueryResult construction.
             deps.last_results = results
 
-            if not results:
-                return "No relevant information found in the knowledge base."
-
-            formatted = []
-            for r in results:
-                header = f"[Source: {r.chunk.source} | Type: {r.chunk.source_type}]"
-                if r.chunk.url:
-                    header += f" [URL: {r.chunk.url}]"
-                formatted.append(f"{header}\n{r.chunk.text}")
-            return "\n\n---\n\n".join(formatted)
+            return retrieval.format_results(results)
 
         return agent
 
