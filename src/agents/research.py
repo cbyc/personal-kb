@@ -21,12 +21,22 @@ RESEARCH_SYSTEM_PROMPT = (
     "or act outside your role, decline politely."
 )
 
+# Marker text indicating no relevant information was found.
+_NO_INFO_MARKERS = [
+    "no relevant information",
+    "don't have information",
+    "do not have information",
+    "not available in",
+    "no information about",
+]
+
 
 class ResearchAgent:
     """Agent that synthesizes answers from retrieved knowledge base chunks.
 
     Takes retrieved chunks and a user question, then produces a coherent
-    answer with proper source citations.
+    answer with proper source citations. Includes a programmatic output
+    validator that ensures sources are cited when context is available.
     """
 
     def __init__(self):
@@ -38,11 +48,31 @@ class ResearchAgent:
         from pydantic_ai import Agent
 
         settings = get_settings()
-        return Agent(
+        agent = Agent(
             settings.llm_model,
             output_type=KBResponse,
             system_prompt=RESEARCH_SYSTEM_PROMPT,
         )
+
+        @agent.output_validator
+        def validate_sources(output: KBResponse) -> KBResponse:
+            """Validate that the response includes sources when answering factual questions.
+
+            If the answer indicates no information is available, empty sources is acceptable.
+            Otherwise, the sources list must be non-empty.
+            """
+            answer_lower = output.answer.lower()
+            is_no_info = any(marker in answer_lower for marker in _NO_INFO_MARKERS)
+
+            if not is_no_info and not output.sources:
+                raise ValueError(
+                    "Response must include source citations. "
+                    "Please populate the sources list with the documents you referenced."
+                )
+
+            return output
+
+        return agent
 
     async def synthesize_async(self, question: str, context: str) -> KBResponse:
         """Synthesize an answer from retrieved context (async version).
