@@ -15,11 +15,10 @@ def _build_retrieval_task():
     """Build retrieval pipeline once, return a task function that queries it."""
     settings = get_settings()
     agent = build_pipeline(settings)
-    deps = agent.deps
 
     def retrieve_for_query(query: str) -> str:
-        query_embedding = deps.embedding_model.embed_text(query)
-        results = deps.vectorstore.search(query_embedding, top_k=3)
+        query_embedding = agent.embedding_model.embed_text(query)
+        results = agent.vectorstore.search(query_embedding, top_k=3)
         return "\n".join(f"[Source: {r.chunk.source}] {r.chunk.text}" for r in results)
 
     return retrieve_for_query
