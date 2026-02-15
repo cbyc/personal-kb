@@ -29,6 +29,13 @@ class Settings(BaseSettings):
     # Data
     notes_dir: str = "data/notes"
 
+    # Firefox bookmarks
+    firefox_profile_path: str = "auto"  # "auto" to detect, or explicit path
+    bookmark_sync_enabled: bool = True
+    bookmark_fetch_timeout: int = 15  # seconds per page download
+    bookmark_max_content_length: int = 50000  # max chars per page
+    bookmark_sync_state_path: str = "data/sync_state.json"
+
     # Input validation
     max_query_length: int = 1000
 
