@@ -66,6 +66,8 @@ class VectorStore:
                         "text": chunk.text,
                         "source": chunk.source,
                         "chunk_index": chunk.chunk_index,
+                        "source_type": chunk.source_type,
+                        "url": chunk.url,
                         "metadata": chunk.metadata,
                     },
                 )
@@ -103,6 +105,8 @@ class VectorStore:
                 text=payload["text"],
                 source=payload["source"],
                 chunk_index=payload["chunk_index"],
+                source_type=payload.get("source_type", "note"),
+                url=payload.get("url"),
                 metadata=payload.get("metadata", {}),
             )
             search_results.append(SearchResult(chunk=chunk, score=point.score))

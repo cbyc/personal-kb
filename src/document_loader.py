@@ -33,6 +33,7 @@ def load_documents(directory: str | Path) -> list[Document]:
                 content=content,
                 source=file_path.name,
                 title=file_path.stem,
+                source_type="note",
             )
         )
     return documents
@@ -116,6 +117,8 @@ def chunk_document(
                 text=chunk_text,
                 source=document.source,
                 chunk_index=chunk_index,
+                source_type=document.source_type,
+                url=document.url,
             )
         )
 
