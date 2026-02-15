@@ -1,5 +1,6 @@
-"""Orchestrator Agent — coordinates retrieval and research agents."""
+"""Orchestrator Agent — coordinates retrieval, research, and guard agents."""
 
+from src.agents.guard import GuardAgent
 from src.agents.research import ResearchAgent
 from src.agents.retrieval import RetrievalAgent, RetrievalDeps
 from src.config import get_settings
@@ -11,11 +12,12 @@ from src.vectorstore import VectorStore
 class OrchestratorAgent:
     """Orchestrates the multi-agent pipeline.
 
-    Routes user queries through the retrieval and research agents:
-    1. Validates the query
-    2. Calls RetrievalAgent to search the knowledge base
-    3. Calls ResearchAgent to synthesize an answer from retrieved chunks
-    4. Returns the final QueryResult
+    Routes user queries through guard, retrieval, and research agents:
+    1. Guard Agent validates input (if guardrails enabled)
+    2. RetrievalAgent searches the knowledge base
+    3. ResearchAgent synthesizes an answer from retrieved chunks
+    4. Guard Agent validates output (if guardrails enabled)
+    5. Returns the final QueryResult
     """
 
     def __init__(
@@ -33,6 +35,7 @@ class OrchestratorAgent:
         )
         self._retrieval_agent = RetrievalAgent(retrieval_deps)
         self._research_agent = ResearchAgent()
+        self._guard_agent = GuardAgent() if self._settings.guardrails_enabled else None
 
     @property
     def vectorstore(self) -> VectorStore:
@@ -73,12 +76,29 @@ class OrchestratorAgent:
         """
         self._validate_query(question)
 
-        # Step 1: Retrieve relevant chunks
+        # Step 1: Guard input validation
+        if self._guard_agent:
+            verdict = self._guard_agent.validate_input(question)
+            if not verdict.allowed:
+                return QueryResult(answer=verdict.reason, sources=[])
+
+        # Step 2: Retrieve relevant chunks
         search_results = self._retrieval_agent.search(question)
         context = self._retrieval_agent.format_results(search_results)
 
-        # Step 2: Synthesize answer
+        # Step 3: Synthesize answer
         kb_response = self._research_agent.synthesize(question, context)
+
+        # Step 4: Guard output validation
+        if self._guard_agent:
+            output_verdict = self._guard_agent.validate_output(
+                question, kb_response.answer, context
+            )
+            if not output_verdict.allowed:
+                return QueryResult(
+                    answer="I could not verify my response. Please try rephrasing your question.",
+                    sources=[],
+                )
 
         return QueryResult(answer=kb_response.answer, sources=search_results)
 
@@ -96,11 +116,28 @@ class OrchestratorAgent:
         """
         self._validate_query(question)
 
-        # Step 1: Retrieve relevant chunks
+        # Step 1: Guard input validation
+        if self._guard_agent:
+            verdict = await self._guard_agent.validate_input_async(question)
+            if not verdict.allowed:
+                return QueryResult(answer=verdict.reason, sources=[])
+
+        # Step 2: Retrieve relevant chunks
         search_results = self._retrieval_agent.search(question)
         context = self._retrieval_agent.format_results(search_results)
 
-        # Step 2: Synthesize answer
+        # Step 3: Synthesize answer
         kb_response = await self._research_agent.synthesize_async(question, context)
+
+        # Step 4: Guard output validation
+        if self._guard_agent:
+            output_verdict = await self._guard_agent.validate_output_async(
+                question, kb_response.answer, context
+            )
+            if not output_verdict.allowed:
+                return QueryResult(
+                    answer="I could not verify my response. Please try rephrasing your question.",
+                    sources=[],
+                )
 
         return QueryResult(answer=kb_response.answer, sources=search_results)
