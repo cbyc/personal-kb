@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(test:*)",
+      "Bash(find:*)",
+      "Bash(uv:*)",
+      "Bash(git:*)",
+      "Bash(ls:*)",
+      "Bash(wc:*)",
+      "WebSearch",
+      "WebFetch(domain:ai.pydantic.dev)",
+      "WebFetch(domain:arize.com)",
+      "WebFetch(domain:logfire.pydantic.dev)",
+      "WebFetch(domain:arize-ai.github.io)",
+      "WebFetch(domain:docs.arize.com)",
+      "WebFetch(domain:pypi.org)",
+      "WebFetch(domain:github.com)",
+      "Bash(grep:*)"
+    ]
+  }
+}
