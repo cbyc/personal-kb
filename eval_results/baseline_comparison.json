@@ -1,0 +1,8 @@
+{
+  "rag_pass_rate": 1.0,
+  "baseline_pass_rate": 0.0,
+  "improvement": 1.0,
+  "rag_passes": 4,
+  "baseline_passes": 0,
+  "total_questions": 4
+}
