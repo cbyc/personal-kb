@@ -1,5 +1,9 @@
 """Research Agent — synthesizes answers from retrieved chunks with citations."""
 
+from collections.abc import Sequence
+
+from pydantic_ai.messages import ModelMessage
+
 from src.config import get_settings
 from src.models import KBResponse
 
@@ -74,30 +78,46 @@ class ResearchAgent:
 
         return agent
 
-    async def synthesize_async(self, question: str, context: str) -> KBResponse:
+    async def synthesize_async(
+        self,
+        question: str,
+        context: str,
+        message_history: Sequence[ModelMessage] | None = None,
+    ) -> KBResponse:
         """Synthesize an answer from retrieved context (async version).
 
         Args:
             question: The user's original question.
             context: Formatted retrieved chunks with source metadata.
+            message_history: Optional conversation history for follow-up context.
 
         Returns:
             A KBResponse with the synthesized answer and source citations.
         """
         prompt = f"Question: {question}\n\nRetrieved context:\n{context}"
-        result = await self._agent.run(prompt)
+        result = await self._agent.run(
+            prompt, message_history=list(message_history) if message_history else None
+        )
         return result.output
 
-    def synthesize(self, question: str, context: str) -> KBResponse:
+    def synthesize(
+        self,
+        question: str,
+        context: str,
+        message_history: Sequence[ModelMessage] | None = None,
+    ) -> KBResponse:
         """Synthesize an answer from retrieved context (sync version).
 
         Args:
             question: The user's original question.
             context: Formatted retrieved chunks with source metadata.
+            message_history: Optional conversation history for follow-up context.
 
         Returns:
             A KBResponse with the synthesized answer and source citations.
         """
         prompt = f"Question: {question}\n\nRetrieved context:\n{context}"
-        result = self._agent.run_sync(prompt)
+        result = self._agent.run_sync(
+            prompt, message_history=list(message_history) if message_history else None
+        )
         return result.output

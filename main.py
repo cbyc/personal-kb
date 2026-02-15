@@ -3,6 +3,7 @@
 import sys
 
 from src.config import get_settings
+from src.memory import ConversationMemory
 from src.pipeline import build_pipeline
 from src.tracing import setup_tracing
 
@@ -26,7 +27,8 @@ def main():
         print(f"\n{result.answer}")
         return
 
-    # Interactive mode
+    # Interactive mode with conversation memory
+    memory = ConversationMemory(max_turns=settings.conversation_history_length)
     print("Type 'quit' to exit.\n")
     while True:
         question = input("You: ").strip()
@@ -34,8 +36,9 @@ def main():
             break
         if not question:
             continue
-        result = agent.ask(question)
+        result = agent.ask(question, message_history=memory.get_history())
         print(f"\nKB: {result.answer}\n")
+        memory.add_turn(question, result.answer)
 
 
 if __name__ == "__main__":

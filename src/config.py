@@ -35,6 +35,9 @@ class Settings(BaseSettings):
     # Guardrails
     guardrails_enabled: bool = True
 
+    # Conversation memory
+    conversation_history_length: int = 10
+
     # Tracing
     tracing_enabled: bool = False
     phoenix_endpoint: str = "http://127.0.0.1:6006/v1/traces"

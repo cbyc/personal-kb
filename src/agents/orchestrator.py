@@ -1,5 +1,9 @@
 """Orchestrator Agent — coordinates retrieval, research, and guard agents."""
 
+from collections.abc import Sequence
+
+from pydantic_ai.messages import ModelMessage
+
 from src.agents.guard import GuardAgent
 from src.agents.research import ResearchAgent
 from src.agents.retrieval import RetrievalAgent, RetrievalDeps
@@ -62,11 +66,16 @@ class OrchestratorAgent:
                 f"Maximum allowed: {self._settings.max_query_length} chars."
             )
 
-    def ask(self, question: str) -> QueryResult:
+    def ask(
+        self,
+        question: str,
+        message_history: Sequence[ModelMessage] | None = None,
+    ) -> QueryResult:
         """Process a question through the multi-agent pipeline (sync).
 
         Args:
             question: The user's question.
+            message_history: Optional conversation history for follow-up context.
 
         Returns:
             A QueryResult with the answer and source documents.
@@ -86,8 +95,10 @@ class OrchestratorAgent:
         search_results = self._retrieval_agent.search(question)
         context = self._retrieval_agent.format_results(search_results)
 
-        # Step 3: Synthesize answer
-        kb_response = self._research_agent.synthesize(question, context)
+        # Step 3: Synthesize answer with conversation history
+        kb_response = self._research_agent.synthesize(
+            question, context, message_history=message_history
+        )
 
         # Step 4: Guard output validation
         if self._guard_agent:
@@ -102,11 +113,16 @@ class OrchestratorAgent:
 
         return QueryResult(answer=kb_response.answer, sources=search_results)
 
-    async def ask_async(self, question: str) -> QueryResult:
+    async def ask_async(
+        self,
+        question: str,
+        message_history: Sequence[ModelMessage] | None = None,
+    ) -> QueryResult:
         """Process a question through the multi-agent pipeline (async).
 
         Args:
             question: The user's question.
+            message_history: Optional conversation history for follow-up context.
 
         Returns:
             A QueryResult with the answer and source documents.
@@ -126,8 +142,10 @@ class OrchestratorAgent:
         search_results = self._retrieval_agent.search(question)
         context = self._retrieval_agent.format_results(search_results)
 
-        # Step 3: Synthesize answer
-        kb_response = await self._research_agent.synthesize_async(question, context)
+        # Step 3: Synthesize answer with conversation history
+        kb_response = await self._research_agent.synthesize_async(
+            question, context, message_history=message_history
+        )
 
         # Step 4: Guard output validation
         if self._guard_agent:
