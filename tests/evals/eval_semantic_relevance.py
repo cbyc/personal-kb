@@ -10,8 +10,6 @@ from pydantic_evals.evaluators import LLMJudge
 from src.config import get_settings
 from src.pipeline import build_pipeline
 
-JUDGE_MODEL = "google-gla:gemini-2.0-flash"
-
 
 def _build_retrieval_task():
     """Build retrieval pipeline once, return a task function that queries it."""
@@ -27,64 +25,68 @@ def _build_retrieval_task():
     return retrieve_for_query
 
 
-semantic_relevance_dataset = Dataset(
-    name="semantic_relevance",
-    cases=[
-        Case(
-            name="project_deadline_relevance",
-            inputs="What is Project Alpha's deadline?",
-            evaluators=[
-                LLMJudge(
-                    rubric="The retrieved text contains information about Project Alpha deadlines or timeline.",
-                    model=JUDGE_MODEL,
-                    include_input=True,
-                ),
-            ],
-        ),
-        Case(
-            name="gradient_descent_relevance",
-            inputs="What is gradient descent?",
-            evaluators=[
-                LLMJudge(
-                    rubric="The retrieved text contains an explanation of gradient descent.",
-                    model=JUDGE_MODEL,
-                    include_input=True,
-                ),
-            ],
-        ),
-        Case(
-            name="sourdough_relevance",
-            inputs="How long should I proof sourdough?",
-            evaluators=[
-                LLMJudge(
-                    rubric="The retrieved text contains information about sourdough proofing times.",
-                    model=JUDGE_MODEL,
-                    include_input=True,
-                ),
-            ],
-        ),
-        Case(
-            name="cross_topic_no_bleed",
-            inputs="What programming language does Project Alpha use?",
-            evaluators=[
-                LLMJudge(
-                    rubric=(
-                        "The retrieved text is primarily about Project Alpha "
-                        "and does NOT contain unrelated content like recipes or ML theory."
+def _build_dataset() -> Dataset:
+    """Build the semantic relevance dataset with judge model from settings."""
+    judge_model = get_settings().judge_model
+    return Dataset(
+        name="semantic_relevance",
+        cases=[
+            Case(
+                name="project_deadline_relevance",
+                inputs="What is Project Alpha's deadline?",
+                evaluators=[
+                    LLMJudge(
+                        rubric="The retrieved text contains information about Project Alpha deadlines or timeline.",
+                        model=judge_model,
+                        include_input=True,
                     ),
-                    model=JUDGE_MODEL,
-                    include_input=True,
-                ),
-            ],
-        ),
-    ],
-)
+                ],
+            ),
+            Case(
+                name="gradient_descent_relevance",
+                inputs="What is gradient descent?",
+                evaluators=[
+                    LLMJudge(
+                        rubric="The retrieved text contains an explanation of gradient descent.",
+                        model=judge_model,
+                        include_input=True,
+                    ),
+                ],
+            ),
+            Case(
+                name="sourdough_relevance",
+                inputs="How long should I proof sourdough?",
+                evaluators=[
+                    LLMJudge(
+                        rubric="The retrieved text contains information about sourdough proofing times.",
+                        model=judge_model,
+                        include_input=True,
+                    ),
+                ],
+            ),
+            Case(
+                name="cross_topic_no_bleed",
+                inputs="What programming language does Project Alpha use?",
+                evaluators=[
+                    LLMJudge(
+                        rubric=(
+                            "The retrieved text is primarily about Project Alpha "
+                            "and does NOT contain unrelated content like recipes or ML theory."
+                        ),
+                        model=judge_model,
+                        include_input=True,
+                    ),
+                ],
+            ),
+        ],
+    )
 
 
 def test_semantic_relevance():
     """Run semantic relevance evaluation."""
     retrieve_for_query = _build_retrieval_task()
-    report = semantic_relevance_dataset.evaluate_sync(retrieve_for_query)
+    dataset = _build_dataset()
+    report = dataset.evaluate_sync(retrieve_for_query)
     report.print()
     assert not report.failures, (
         f"Eval had task errors: {[f.error_message for f in report.failures]}"

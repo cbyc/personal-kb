@@ -10,6 +10,7 @@ class Settings(BaseSettings):
 
     # LLM
     llm_model: str = "google-gla:gemini-2.0-flash"
+    judge_model: str = "google-gla:gemini-2.0-flash"
 
     # Embeddings
     embedding_model: str = "sentence-transformers/all-MiniLM-L6-v2"
