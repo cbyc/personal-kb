@@ -31,6 +31,21 @@ class SearchResult(BaseModel):
     score: float
 
 
+class SourceReference(BaseModel):
+    """A citation reference to a source document."""
+
+    title: str
+    source_type: str  # "note" or "bookmark"
+    url: str | None = None  # original URL for bookmarks
+
+
+class KBResponse(BaseModel):
+    """Structured response from the knowledge base agent."""
+
+    answer: str
+    sources: list[SourceReference] = Field(default_factory=list)
+
+
 class QueryResult(BaseModel):
     """The final answer from the RAG agent."""
 
