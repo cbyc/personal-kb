@@ -7,8 +7,10 @@ class Document(BaseModel):
     """A loaded document with metadata."""
 
     content: str
-    source: str  # file path
+    source: str  # file path or URL
     title: str = ""
+    source_type: str = "note"  # "note" or "bookmark"
+    url: str | None = None  # original URL for bookmarks
 
 
 class Chunk(BaseModel):
@@ -17,6 +19,8 @@ class Chunk(BaseModel):
     text: str
     source: str
     chunk_index: int
+    source_type: str = "note"  # "note" or "bookmark"
+    url: str | None = None  # original URL for bookmarks
     metadata: dict = Field(default_factory=dict)
 
 

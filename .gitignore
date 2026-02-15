@@ -19,3 +19,6 @@ build/
 
 # Environment
 .env
+
+# Implementation plan
+IMPLEMENTATION_PLAN.md
