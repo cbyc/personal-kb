@@ -1,6 +1,7 @@
 """Tests for the ResearchAgent."""
 
 import pytest
+from pydantic_ai.messages import ModelRequest, ModelResponse, TextPart, UserPromptPart
 
 from src.agents.research import ResearchAgent
 from src.models import KBResponse
@@ -58,5 +59,37 @@ class TestResearchAgentMultiSource:
             "The team decided to use Alembic for database migrations."
         )
         result = research_agent.synthesize("What tech stack does the project use?", context)
+        assert isinstance(result, KBResponse)
+        assert len(result.sources) > 0
+
+
+class TestResearchAgentFollowUp:
+    """Tests for follow-up question handling with conversation history."""
+
+    def test_follow_up_with_no_chunks_accepts_empty_sources(self, research_agent: ResearchAgent):
+        """Follow-up answered from history alone should not crash on empty sources."""
+        context = "No relevant information found in the knowledge base."
+        history = [
+            ModelRequest(parts=[UserPromptPart(content="What is Project Alpha's deadline?")]),
+            ModelResponse(parts=[TextPart(content="Project Alpha's deadline is March 30, 2024.")]),
+        ]
+        result = research_agent.synthesize(
+            "Tell me more about that deadline", context, message_history=history
+        )
+        assert isinstance(result, KBResponse)
+
+    def test_follow_up_with_chunks_returns_sources(self, research_agent: ResearchAgent):
+        """Follow-up with fresh chunks should still populate sources."""
+        context = (
+            "[Source: project_alpha.txt | Type: note]\n"
+            "Project Alpha uses Python and FastAPI for the backend."
+        )
+        history = [
+            ModelRequest(parts=[UserPromptPart(content="What is Project Alpha?")]),
+            ModelResponse(parts=[TextPart(content="Project Alpha is a customer-facing web app.")]),
+        ]
+        result = research_agent.synthesize(
+            "What tech stack does it use?", context, message_history=history
+        )
         assert isinstance(result, KBResponse)
         assert len(result.sources) > 0

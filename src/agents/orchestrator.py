@@ -131,7 +131,7 @@ class OrchestratorAgent:
             return QueryResult(
                 answer="I found relevant information but could not synthesize a response. "
                 "Please try rephrasing your question.",
-                sources=search_results,
+                sources=[],
             )
 
         # Step 4: Guard output validation
@@ -187,7 +187,7 @@ class OrchestratorAgent:
             return QueryResult(
                 answer="I found relevant information but could not synthesize a response. "
                 "Please try rephrasing your question.",
-                sources=search_results,
+                sources=[],
             )
 
         # Step 4: Guard output validation
