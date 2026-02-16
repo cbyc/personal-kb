@@ -72,9 +72,7 @@ class RetrievalAgent:
 
             formatted = []
             for r in results:
-                header = f"[Source: {r.chunk.source} | Type: {r.chunk.source_type}]"
-                if r.chunk.url:
-                    header += f" [URL: {r.chunk.url}]"
+                header = f"[Source: {r.chunk.source}]"
                 formatted.append(f"{header}\n{r.chunk.text}")
             return "\n\n---\n\n".join(formatted)
 
@@ -114,8 +112,6 @@ class RetrievalAgent:
 
         formatted = []
         for r in results:
-            header = f"[Source: {r.chunk.source} | Type: {r.chunk.source_type}]"
-            if r.chunk.url:
-                header += f" [URL: {r.chunk.url}]"
+            header = f"[Source: {r.chunk.source}]"
             formatted.append(f"{header}\n{r.chunk.text}")
         return "\n\n---\n\n".join(formatted)

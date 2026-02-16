@@ -6,7 +6,7 @@ from pydantic_ai import RunContext
 from pydantic_ai.messages import ModelMessage
 
 from src.config import get_settings
-from src.models import KBResponse
+from src.models import QueryResult
 
 
 RESEARCH_SYSTEM_PROMPT = (
@@ -15,15 +15,15 @@ RESEARCH_SYSTEM_PROMPT = (
     "Your job is to synthesize a coherent, accurate answer from these chunks. "
     "Rules: "
     "1. ONLY use information from the provided chunks. Do NOT use general knowledge. "
-    "2. Always cite sources inline in the answer text: "
-    "for bookmarks, cite using the URL (e.g. 'according to https://example.com/page'); "
-    "for notes, cite using the file path from the Source header (e.g. 'according to data/notes/file.txt'). "
+    "2. Always cite sources inline in the answer text using the source identifier "
+    "from the [Source: ...] header (e.g. 'according to data/notes/file.txt' or "
+    "'according to https://example.com/page'). "
     "3. If the chunks don't contain relevant information, say: "
     "I don't have information about that in my knowledge base. "
     "4. When combining information from multiple sources, clearly attribute each piece. "
-    "5. Populate the sources list with every source document you cited. "
-    "Each source must have a title (the file path for notes, or the page title for bookmarks), "
-    "source_type ('note' or 'bookmark'), and url (only for bookmarks, null for notes). "
+    "5. Populate the sources list with every source you cited. "
+    "Each source should be the exact string from the [Source: ...] header "
+    "(a file path like 'data/notes/file.txt' or a URL like 'https://example.com/page'). "
     "6. For follow-up questions: even if you use conversation history to resolve references, "
     "you MUST still populate the sources list from the retrieved context chunks "
     "whenever they contribute to your answer. "
@@ -63,12 +63,12 @@ class ResearchAgent:
         settings = get_settings()
         agent = Agent(
             settings.llm_model,
-            output_type=KBResponse,
+            output_type=QueryResult,
             system_prompt=RESEARCH_SYSTEM_PROMPT,
         )
 
         @agent.output_validator
-        def validate_sources(ctx: RunContext, output: KBResponse) -> KBResponse:
+        def validate_sources(ctx: RunContext, output: QueryResult) -> QueryResult:
             """Validate that the response includes sources when answering factual questions.
 
             If the answer indicates no information is available, empty sources is acceptable.
@@ -117,7 +117,7 @@ class ResearchAgent:
         question: str,
         context: str,
         message_history: Sequence[ModelMessage] | None = None,
-    ) -> KBResponse:
+    ) -> QueryResult:
         """Synthesize an answer from retrieved context (async version).
 
         Args:
@@ -126,7 +126,7 @@ class ResearchAgent:
             message_history: Optional conversation history for follow-up context.
 
         Returns:
-            A KBResponse with the synthesized answer and source citations.
+            A QueryResult with the synthesized answer and source citations.
         """
         prompt = f"Question: {question}\n\nRetrieved context:\n{context}"
         result = await self._agent.run(
@@ -139,7 +139,7 @@ class ResearchAgent:
         question: str,
         context: str,
         message_history: Sequence[ModelMessage] | None = None,
-    ) -> KBResponse:
+    ) -> QueryResult:
         """Synthesize an answer from retrieved context (sync version).
 
         Args:
@@ -148,7 +148,7 @@ class ResearchAgent:
             message_history: Optional conversation history for follow-up context.
 
         Returns:
-            A KBResponse with the synthesized answer and source citations.
+            A QueryResult with the synthesized answer and source citations.
         """
         prompt = f"Question: {question}\n\nRetrieved context:\n{context}"
         result = self._agent.run_sync(

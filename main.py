@@ -20,12 +20,7 @@ def format_sources(result: QueryResult) -> str:
     """
     if not result.sources:
         return ""
-    seen: dict[str, None] = {}
-    for s in result.sources:
-        if s.chunk.source_type == "bookmark" and s.chunk.url:
-            seen.setdefault(s.chunk.url, None)
-        else:
-            seen.setdefault(s.chunk.source, None)
+    seen = list(dict.fromkeys(result.sources))
     lines = [f"  - {ref}" for ref in seen]
     return "Sources:\n" + "\n".join(lines)
 

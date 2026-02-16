@@ -7,20 +7,15 @@ class Document(BaseModel):
     """A loaded document with metadata."""
 
     content: str
-    source: str  # file path or URL
-    title: str = ""
-    source_type: str = "note"  # "note" or "bookmark"
-    url: str | None = None  # original URL for bookmarks
+    source: str  # file path for notes, URL for bookmarks
 
 
 class Chunk(BaseModel):
     """A text chunk from a document."""
 
     text: str
-    source: str
+    source: str  # file path or URL
     chunk_index: int
-    source_type: str = "note"  # "note" or "bookmark"
-    url: str | None = None  # original URL for bookmarks
     metadata: dict = Field(default_factory=dict)
 
 
@@ -31,23 +26,8 @@ class SearchResult(BaseModel):
     score: float
 
 
-class SourceReference(BaseModel):
-    """A citation reference to a source document."""
-
-    title: str
-    source_type: str  # "note" or "bookmark"
-    url: str | None = None  # original URL for bookmarks
-
-
-class KBResponse(BaseModel):
-    """Structured response from the knowledge base agent."""
-
-    answer: str
-    sources: list[SourceReference] = Field(default_factory=list)
-
-
 class QueryResult(BaseModel):
     """The final answer from the RAG agent."""
 
     answer: str
-    sources: list[SearchResult] = Field(default_factory=list)
+    sources: list[str] = Field(default_factory=list)

@@ -24,20 +24,16 @@ def retrieval_agent(test_settings) -> RetrievalAgent:
             text="Project Alpha deadline is March 30, 2024.",
             source="project_alpha.txt",
             chunk_index=0,
-            source_type="note",
         ),
         Chunk(
             text="Gradient descent is an optimization algorithm.",
             source="machine_learning_notes.txt",
             chunk_index=0,
-            source_type="note",
         ),
         Chunk(
             text="Kubernetes networking uses CNI plugins for pod communication.",
             source="https://example.com/k8s-networking",
             chunk_index=0,
-            source_type="bookmark",
-            url="https://example.com/k8s-networking",
         ),
     ]
     embeddings = embedding_model.embed_texts([c.text for c in chunks])
@@ -63,18 +59,11 @@ class TestRetrievalAgentSearch:
         sources = [r.chunk.source for r in results]
         assert "project_alpha.txt" in sources
 
-    def test_search_includes_source_type(self, retrieval_agent: RetrievalAgent):
-        """search() results should include source_type metadata."""
-        results = retrieval_agent.search("Project Alpha deadline")
-        for r in results:
-            assert r.chunk.source_type in ("note", "bookmark")
-
-    def test_search_bookmark_includes_url(self, retrieval_agent: RetrievalAgent):
-        """search() results for bookmarks should include the URL."""
+    def test_search_returns_url_source(self, retrieval_agent: RetrievalAgent):
+        """search() should return URL as source for bookmark-originated chunks."""
         results = retrieval_agent.search("Kubernetes networking CNI")
-        bookmark_results = [r for r in results if r.chunk.source_type == "bookmark"]
-        assert len(bookmark_results) > 0
-        assert bookmark_results[0].chunk.url == "https://example.com/k8s-networking"
+        sources = [r.chunk.source for r in results]
+        assert "https://example.com/k8s-networking" in sources
 
     def test_search_empty_for_irrelevant_query(self, retrieval_agent: RetrievalAgent):
         """search() should return empty or low-scoring results for irrelevant queries."""
@@ -92,15 +81,13 @@ class TestRetrievalAgentFormatResults:
         assert "No relevant information found" in result
 
     def test_format_note_results(self, retrieval_agent: RetrievalAgent):
-        """format_results() should include source and type for notes."""
+        """format_results() should include source for notes."""
         results = retrieval_agent.search("Project Alpha deadline")
         formatted = retrieval_agent.format_results(results)
-        assert "project_alpha.txt" in formatted
-        assert "Type: note" in formatted
+        assert "[Source: project_alpha.txt]" in formatted
 
     def test_format_bookmark_results(self, retrieval_agent: RetrievalAgent):
-        """format_results() should include URL for bookmark results."""
+        """format_results() should include URL source for bookmark-originated chunks."""
         results = retrieval_agent.search("Kubernetes networking")
         formatted = retrieval_agent.format_results(results)
-        assert "URL: https://example.com/k8s-networking" in formatted
-        assert "Type: bookmark" in formatted
+        assert "[Source: https://example.com/k8s-networking]" in formatted

@@ -95,8 +95,6 @@ def chunk_document(
                 text=chunk_text,
                 source=document.source,
                 chunk_index=chunk_index,
-                source_type=document.source_type,
-                url=document.url,
             )
         )
 

@@ -28,8 +28,6 @@ def load_documents(directory: str | Path) -> list[Document]:
             Document(
                 content=content,
                 source=str(file_path),
-                title=file_path.stem,
-                source_type="note",
             )
         )
     return documents

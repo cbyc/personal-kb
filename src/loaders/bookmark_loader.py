@@ -273,10 +273,7 @@ def load_bookmarks(
             documents.append(
                 Document(
                     content=content,
-                    source=bookmark.title,
-                    title=bookmark.title,
-                    source_type="bookmark",
-                    url=bookmark.url,
+                    source=bookmark.url,
                 )
             )
         max_timestamp = max(max_timestamp, bookmark.date_added)

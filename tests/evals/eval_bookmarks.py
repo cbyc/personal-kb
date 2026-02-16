@@ -27,10 +27,7 @@ _BOOKMARK_DOCUMENTS = [
             "Rust was first released in 2015 and has been voted the most loved programming language "
             "in Stack Overflow surveys multiple years in a row."
         ),
-        source="Rust Programming Guide",
-        title="Rust Programming Guide",
-        source_type="bookmark",
-        url="https://doc.rust-lang.org/book/",
+        source="https://doc.rust-lang.org/book/",
     ),
     Document(
         content=(
@@ -43,10 +40,7 @@ _BOOKMARK_DOCUMENTS = [
             "Document decisions in shared wikis to reduce meeting fatigue. "
             "Remote retrospectives should use anonymous feedback tools."
         ),
-        source="Effective Remote Team Management",
-        title="Effective Remote Team Management",
-        source_type="bookmark",
-        url="https://example.com/remote-teams-guide",
+        source="https://example.com/remote-teams-guide",
     ),
     Document(
         content=(
@@ -58,10 +52,7 @@ _BOOKMARK_DOCUMENTS = [
             "Use cases include gaming, image processing, and scientific computing on the web. "
             "WASI (WebAssembly System Interface) extends Wasm beyond the browser."
         ),
-        source="Understanding WebAssembly",
-        title="Understanding WebAssembly",
-        source_type="bookmark",
-        url="https://webassembly.org/docs/",
+        source="https://webassembly.org/docs/",
     ),
 ]
 
@@ -103,14 +94,7 @@ def _build_ask_task():
         # Include source info in the answer so judges can verify citations
         source_info = ""
         if result.sources:
-            source_strs = []
-            for s in result.sources:
-                src = f"{s.chunk.source} ({s.chunk.source_type})"
-                if s.chunk.url:
-                    src += f" [{s.chunk.url}]"
-                source_strs.append(src)
-            # Deduplicate
-            source_strs = list(dict.fromkeys(source_strs))
+            source_strs = list(dict.fromkeys(result.sources))
             source_info = "\n\nRetrieved sources: " + "; ".join(source_strs)
         return result.answer + source_info
 
@@ -131,7 +115,7 @@ def _build_dataset() -> Dataset:
                         rubric=(
                             "The answer explains that Rust's borrow checker enforces memory safety "
                             "at compile time. The answer should be based on retrieved content "
-                            "and mention it's from a bookmark source."
+                            "and cite the source URL (https://doc.rust-lang.org/book/)."
                         ),
                         model=judge_model,
                         include_input=True,
@@ -145,8 +129,8 @@ def _build_dataset() -> Dataset:
                     LLMJudge(
                         rubric=(
                             "The answer mentions that daily standups should be 15 minutes "
-                            "and focus on blockers. The sources should reference the bookmark "
-                            "about remote team management."
+                            "and focus on blockers. The sources should cite the URL "
+                            "https://example.com/remote-teams-guide."
                         ),
                         model=judge_model,
                         include_input=True,
@@ -161,8 +145,8 @@ def _build_dataset() -> Dataset:
                         rubric=(
                             "The answer should reference information from multiple sources, "
                             "potentially including both notes (e.g., machine learning notes) "
-                            "and bookmarks (e.g., Rust, WebAssembly). "
-                            "It should cite sources from different source types."
+                            "and web sources (e.g., Rust, WebAssembly). "
+                            "It should cite sources from both file paths and URLs."
                         ),
                         model=judge_model,
                         include_input=True,
@@ -176,8 +160,8 @@ def _build_dataset() -> Dataset:
                     LLMJudge(
                         rubric=(
                             "The answer explains that WASI (WebAssembly System Interface) "
-                            "extends WebAssembly beyond the browser. The information should "
-                            "come from the bookmarked content."
+                            "extends WebAssembly beyond the browser. The answer should "
+                            "cite the source URL (https://webassembly.org/docs/)."
                         ),
                         model=judge_model,
                         include_input=True,

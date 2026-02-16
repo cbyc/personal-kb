@@ -24,7 +24,6 @@ def sample_document() -> Document:
     return Document(
         content="This is a test document with some content about testing.",
         source="test_file.txt",
-        title="Test Document",
     )
 
 
@@ -35,7 +34,6 @@ def sample_long_document() -> Document:
     return Document(
         content=content.strip(),
         source="long_file.txt",
-        title="Long Document",
     )
 
 
