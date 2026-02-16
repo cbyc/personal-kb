@@ -12,6 +12,7 @@ dependencies = [
     "sentence-transformers",
     "opentelemetry-sdk",
     "opentelemetry-exporter-otlp",
+    "trafilatura",
 ]
 
 [project.optional-dependencies]
