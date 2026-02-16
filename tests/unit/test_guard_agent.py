@@ -22,9 +22,7 @@ class TestGuardInputValidation:
 
     def test_accepts_summary_query(self, guard_agent: GuardAgent):
         """A summary request should be allowed."""
-        verdict = guard_agent.validate_input(
-            "Summarize everything I have about machine learning"
-        )
+        verdict = guard_agent.validate_input("Summarize everything I have about machine learning")
         assert verdict.allowed is True
 
     def test_rejects_prompt_injection(self, guard_agent: GuardAgent):

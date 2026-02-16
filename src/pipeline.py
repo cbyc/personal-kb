@@ -52,9 +52,7 @@ def build_pipeline(settings: Settings) -> OrchestratorAgent:
             max_content_length=settings.bookmark_max_content_length,
         )
         for doc in bookmark_docs:
-            chunks.extend(
-                chunk_document(doc, settings.chunk_size, settings.chunk_overlap)
-            )
+            chunks.extend(chunk_document(doc, settings.chunk_size, settings.chunk_overlap))
         logger.info("Total chunks after bookmark sync: %d", len(chunks))
 
     embeddings = embedding_model.embed_texts([c.text for c in chunks])

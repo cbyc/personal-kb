@@ -136,9 +136,7 @@ class GuardAgent:
         result = self._output_agent.run_sync(prompt)
         return result.output
 
-    async def validate_output_async(
-        self, question: str, answer: str, context: str
-    ) -> GuardVerdict:
+    async def validate_output_async(self, question: str, answer: str, context: str) -> GuardVerdict:
         """Validate an agent's response against the retrieved context (async).
 
         Args:

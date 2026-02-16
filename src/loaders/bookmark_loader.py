@@ -49,8 +49,7 @@ def find_firefox_profile() -> Path | None:
     # Look for default profile (usually ends with .default or .default-release)
     for profile_dir in sorted(profiles_dir.iterdir()):
         if profile_dir.is_dir() and (
-            profile_dir.name.endswith(".default")
-            or profile_dir.name.endswith(".default-release")
+            profile_dir.name.endswith(".default") or profile_dir.name.endswith(".default-release")
         ):
             places_db = profile_dir / "places.sqlite"
             if places_db.exists():

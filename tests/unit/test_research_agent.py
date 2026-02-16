@@ -18,8 +18,7 @@ class TestResearchAgentSynthesize:
     def test_returns_kb_response(self, research_agent: ResearchAgent):
         """synthesize() should return a KBResponse object."""
         context = (
-            "[Source: project_alpha.txt | Type: note]\n"
-            "Project Alpha deadline is March 30, 2024."
+            "[Source: project_alpha.txt | Type: note]\nProject Alpha deadline is March 30, 2024."
         )
         result = research_agent.synthesize("What is Project Alpha's deadline?", context)
         assert isinstance(result, KBResponse)
@@ -27,8 +26,7 @@ class TestResearchAgentSynthesize:
     def test_answer_contains_relevant_info(self, research_agent: ResearchAgent):
         """synthesize() should include relevant information from context."""
         context = (
-            "[Source: project_alpha.txt | Type: note]\n"
-            "Project Alpha deadline is March 30, 2024."
+            "[Source: project_alpha.txt | Type: note]\nProject Alpha deadline is March 30, 2024."
         )
         result = research_agent.synthesize("What is Project Alpha's deadline?", context)
         assert "March 30" in result.answer or "2024" in result.answer
@@ -36,8 +34,7 @@ class TestResearchAgentSynthesize:
     def test_sources_populated(self, research_agent: ResearchAgent):
         """synthesize() should populate the sources list."""
         context = (
-            "[Source: project_alpha.txt | Type: note]\n"
-            "Project Alpha deadline is March 30, 2024."
+            "[Source: project_alpha.txt | Type: note]\nProject Alpha deadline is March 30, 2024."
         )
         result = research_agent.synthesize("What is Project Alpha's deadline?", context)
         assert len(result.sources) > 0
@@ -60,8 +57,6 @@ class TestResearchAgentMultiSource:
             "[Source: meeting_2024_01.txt | Type: note]\n"
             "The team decided to use Alembic for database migrations."
         )
-        result = research_agent.synthesize(
-            "What tech stack does the project use?", context
-        )
+        result = research_agent.synthesize("What tech stack does the project use?", context)
         assert isinstance(result, KBResponse)
         assert len(result.sources) > 0

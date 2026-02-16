@@ -23,4 +23,7 @@ build/
 # Implementation plan
 IMPLEMENTATION_PLAN.md
 
+# Sync state
+data/sync_state.json
+
 .gemini_api_key

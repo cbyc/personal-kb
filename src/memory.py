@@ -27,9 +27,7 @@ class ConversationMemory:
                 Oldest turns are dropped when the limit is exceeded.
         """
         self._max_turns = max_turns
-        self._turns: deque[tuple[ModelRequest, ModelResponse]] = deque(
-            maxlen=max_turns
-        )
+        self._turns: deque[tuple[ModelRequest, ModelResponse]] = deque(maxlen=max_turns)
 
     def add_turn(self, user_message: str, assistant_message: str) -> None:
         """Record a conversation turn.
