@@ -5,6 +5,7 @@ duplicated setup code across main.py, tests, and evals.
 """
 
 import logging
+from pathlib import Path
 
 from src.agents.orchestrator import OrchestratorAgent
 from src.config import Settings
@@ -16,7 +17,7 @@ from src.vectorstore import VectorStore
 logger = logging.getLogger(__name__)
 
 
-def build_pipeline(settings: Settings) -> OrchestratorAgent:
+def build_pipeline(settings: Settings, *, reindex: bool = False) -> OrchestratorAgent:
     """Build the full RAG pipeline: load, chunk, embed, index, and create orchestrator.
 
     Loads notes from the notes directory, and optionally syncs Firefox bookmarks
@@ -24,6 +25,7 @@ def build_pipeline(settings: Settings) -> OrchestratorAgent:
 
     Args:
         settings: Application settings.
+        reindex: If True, clear existing data and reindex everything from scratch.
 
     Returns:
         A fully initialized OrchestratorAgent ready to answer questions.
@@ -38,6 +40,14 @@ def build_pipeline(settings: Settings) -> OrchestratorAgent:
         use_memory=settings.qdrant_use_memory,
         embedding_dimension=settings.embedding_dimension,
     )
+
+    if reindex:
+        logger.info("Reindex requested — clearing existing data...")
+        vectorstore.delete_collection()
+        sync_state = Path(settings.bookmark_sync_state_path)
+        if sync_state.exists():
+            sync_state.unlink()
+            logger.info("Removed bookmark sync state: %s", sync_state)
 
     # Load and chunk notes
     chunks = load_and_chunk(settings.notes_dir, settings.chunk_size, settings.chunk_overlap)

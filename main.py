@@ -1,6 +1,6 @@
 """CLI entry point for the Personal Knowledge Base."""
 
-import sys
+import argparse
 
 from src.config import get_settings
 from src.memory import ConversationMemory
@@ -30,21 +30,36 @@ def format_sources(result: QueryResult) -> str:
     return "Sources:\n" + "\n".join(lines)
 
 
+def parse_args() -> argparse.Namespace:
+    """Parse CLI arguments."""
+    parser = argparse.ArgumentParser(description="Personal KB - Second Brain")
+    parser.add_argument(
+        "--reindex",
+        action="store_true",
+        help="Clear all indexed data and reindex notes and bookmarks from scratch.",
+    )
+    parser.add_argument("question", nargs="*", help="Question to ask (interactive mode if omitted)")
+    return parser.parse_args()
+
+
 def main():
     """Run the personal KB CLI."""
+    args = parse_args()
     settings = get_settings()
     setup_tracing()
 
     print("Personal KB - Second Brain")
+    if args.reindex:
+        print("Reindexing all data from scratch...")
     print("Loading knowledge base...")
 
-    agent = build_pipeline(settings)
+    agent = build_pipeline(settings, reindex=args.reindex)
 
     print("Ready for questions!")
 
     # Single query mode via CLI argument
-    if len(sys.argv) > 1:
-        question = " ".join(sys.argv[1:])
+    if args.question:
+        question = " ".join(args.question)
         result = agent.ask(question)
         print(f"\n{result.answer}")
         sources = format_sources(result)
