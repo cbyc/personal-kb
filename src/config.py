@@ -30,7 +30,7 @@ class Settings(BaseSettings):
     notes_dir: str = "data/notes"
 
     # Firefox bookmarks
-    firefox_profile_path: str = "auto"  # "auto" to detect, or explicit path
+    firefox_profile_path: str = "auto"  # "auto" to detect, or path to profile dir or places.sqlite
     bookmark_sync_enabled: bool = True
     bookmark_fetch_timeout: int = 15  # seconds per page download
     bookmark_max_content_length: int = 50000  # max chars per page

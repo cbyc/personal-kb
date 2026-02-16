@@ -241,6 +241,9 @@ def load_bookmarks(
             return []
     else:
         resolved_path = Path(profile_path)
+        # Accept path to places.sqlite directly or to the profile directory
+        if resolved_path.name == "places.sqlite" and resolved_path.is_file():
+            resolved_path = resolved_path.parent
         if not resolved_path.exists():
             logger.warning("Firefox profile not found at: %s", resolved_path)
             return []
