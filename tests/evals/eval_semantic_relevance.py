@@ -14,6 +14,7 @@ from src.pipeline import build_pipeline
 def _build_retrieval_task():
     """Build retrieval pipeline once, return a task function that queries it."""
     settings = get_settings()
+    settings.bookmark_sync_enabled = False
     agent = build_pipeline(settings)
 
     def retrieve_for_query(query: str) -> str:
@@ -69,8 +70,9 @@ def _build_dataset() -> Dataset:
                 evaluators=[
                     LLMJudge(
                         rubric=(
-                            "The retrieved text is primarily about Project Alpha "
-                            "and does NOT contain unrelated content like recipes or ML theory."
+                            "The most relevant retrieved text (the first result) is about "
+                            "Project Alpha and contains information about the project. "
+                            "It does NOT have recipe content as the top result."
                         ),
                         model=judge_model,
                         include_input=True,

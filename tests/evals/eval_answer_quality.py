@@ -15,6 +15,7 @@ from src.pipeline import build_pipeline
 def _build_ask_task():
     """Build full RAG pipeline once, return an async task function that answers questions."""
     settings = get_settings()
+    settings.bookmark_sync_enabled = False
     agent = build_pipeline(settings)
 
     async def ask_question(question: str) -> str:

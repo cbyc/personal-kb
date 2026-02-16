@@ -47,8 +47,7 @@ COMPARISON_QUESTIONS = [
         "name": "meeting_attendees",
         "question": "Who attended the January meeting?",
         "rubric": (
-            "The answer lists specific attendees including "
-            "Sarah Chen, Marcus Johnson, Priya Patel."
+            "The answer lists specific attendees including Sarah Chen, Marcus Johnson, Priya Patel."
         ),
     },
 ]
@@ -57,6 +56,7 @@ COMPARISON_QUESTIONS = [
 def _build_rag_dataset() -> tuple[Dataset, callable]:
     """Build dataset and task for the RAG system."""
     settings = get_settings()
+    settings.bookmark_sync_enabled = False
     agent = build_pipeline(settings)
     judge_model = settings.judge_model
 
@@ -136,11 +136,11 @@ def test_baseline_comparison():
     rag_rate = rag_passes / total if total > 0 else 0
     baseline_rate = baseline_passes / total if total > 0 else 0
 
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print(f"RAG System:  {rag_passes}/{total} ({rag_rate:.0%}) passed")
     print(f"Baseline:    {baseline_passes}/{total} ({baseline_rate:.0%}) passed")
     print(f"Improvement: {rag_rate - baseline_rate:+.0%}")
-    print(f"{'='*60}\n")
+    print(f"{'=' * 60}\n")
 
     # Save results
     results_dir = Path("eval_results")
@@ -159,6 +159,5 @@ def test_baseline_comparison():
 
     # RAG should outperform baseline
     assert rag_passes >= baseline_passes, (
-        f"RAG system ({rag_passes}/{total}) should outperform "
-        f"baseline ({baseline_passes}/{total})"
+        f"RAG system ({rag_passes}/{total}) should outperform baseline ({baseline_passes}/{total})"
     )

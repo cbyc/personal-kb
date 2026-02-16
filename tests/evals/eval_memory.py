@@ -17,6 +17,7 @@ from src.pipeline import build_pipeline
 def agent():
     """Build the pipeline once for all memory eval tests."""
     settings = get_settings()
+    settings.bookmark_sync_enabled = False
     return build_pipeline(settings)
 
 

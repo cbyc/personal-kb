@@ -14,6 +14,7 @@ from src.pipeline import build_pipeline
 def _build_retrieval_task():
     """Build retrieval pipeline once, return a task function that queries it."""
     settings = get_settings()
+    settings.bookmark_sync_enabled = False
     agent = build_pipeline(settings)
 
     def retrieve_for_query(query: str) -> str:

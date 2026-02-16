@@ -1,6 +1,5 @@
 """Tests for the Firefox bookmark loader."""
 
-import json
 import sqlite3
 from pathlib import Path
 from unittest.mock import patch
@@ -11,7 +10,6 @@ from src.loaders.bookmark_loader import (
     BookmarkRecord,
     _query_bookmarks,
     fetch_page_content,
-    load_bookmarks,
     load_sync_state,
     read_bookmarks,
     save_sync_state,
