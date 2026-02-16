@@ -1,42 +1,20 @@
-"""File loading and text chunking."""
+"""Text chunking and convenience loading functions.
+
+The actual document loading logic lives in src/loaders/ (notes_loader,
+bookmark_loader).  This module provides chunking and the load_and_chunk
+convenience wrapper.
+"""
 
 import re
 from pathlib import Path
 
+from src.loaders.notes_loader import load_documents  # re-export for back-compat
 from src.models import Chunk, Document
 
 # Sentence-ending patterns: period/question mark/exclamation followed by whitespace, or paragraph break.
 _SENTENCE_BOUNDARY = re.compile(r"[.!?]\s|\n\n")
 
-
-def load_documents(directory: str | Path) -> list[Document]:
-    """Load all .txt files from a directory.
-
-    Args:
-        directory: Path to the directory containing .txt files.
-
-    Returns:
-        List of Document objects with content and source metadata.
-
-    Raises:
-        FileNotFoundError: If the directory does not exist.
-    """
-    dir_path = Path(directory)
-    if not dir_path.exists():
-        raise FileNotFoundError(f"Directory not found: {dir_path}")
-
-    documents = []
-    for file_path in sorted(dir_path.glob("*.txt")):
-        content = file_path.read_text(encoding="utf-8")
-        documents.append(
-            Document(
-                content=content,
-                source=file_path.name,
-                title=file_path.stem,
-                source_type="note",
-            )
-        )
-    return documents
+__all__ = ["load_documents", "chunk_document", "load_and_chunk"]
 
 
 def _find_split_point(text: str, start: int, end: int, chunk_size: int) -> int:
