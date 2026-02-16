@@ -1,5 +1,6 @@
 """Orchestrator Agent — coordinates retrieval, research, and guard agents."""
 
+import logging
 from collections.abc import Sequence
 
 from pydantic_ai.messages import ModelMessage
@@ -11,6 +12,8 @@ from src.config import get_settings
 from src.embeddings import EmbeddingModel
 from src.models import QueryResult
 from src.vectorstore import VectorStore
+
+logger = logging.getLogger(__name__)
 
 
 class OrchestratorAgent:
@@ -96,9 +99,17 @@ class OrchestratorAgent:
         context = self._retrieval_agent.format_results(search_results)
 
         # Step 3: Synthesize answer with conversation history
-        kb_response = self._research_agent.synthesize(
-            question, context, message_history=message_history
-        )
+        try:
+            kb_response = self._research_agent.synthesize(
+                question, context, message_history=message_history
+            )
+        except Exception:
+            logger.warning("Research agent failed, returning fallback response", exc_info=True)
+            return QueryResult(
+                answer="I found relevant information but could not synthesize a response. "
+                "Please try rephrasing your question.",
+                sources=search_results,
+            )
 
         # Step 4: Guard output validation
         if self._guard_agent:
@@ -143,9 +154,17 @@ class OrchestratorAgent:
         context = self._retrieval_agent.format_results(search_results)
 
         # Step 3: Synthesize answer with conversation history
-        kb_response = await self._research_agent.synthesize_async(
-            question, context, message_history=message_history
-        )
+        try:
+            kb_response = await self._research_agent.synthesize_async(
+                question, context, message_history=message_history
+            )
+        except Exception:
+            logger.warning("Research agent failed, returning fallback response", exc_info=True)
+            return QueryResult(
+                answer="I found relevant information but could not synthesize a response. "
+                "Please try rephrasing your question.",
+                sources=search_results,
+            )
 
         # Step 4: Guard output validation
         if self._guard_agent:
