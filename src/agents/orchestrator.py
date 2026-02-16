@@ -10,7 +10,7 @@ from src.agents.research import ResearchAgent
 from src.agents.retrieval import RetrievalAgent, RetrievalDeps
 from src.config import get_settings
 from src.embeddings import EmbeddingModel
-from src.models import QueryResult
+from src.models import KBResponse, QueryResult, SearchResult
 from src.vectorstore import VectorStore
 
 logger = logging.getLogger(__name__)
@@ -53,6 +53,29 @@ class OrchestratorAgent:
     def embedding_model(self) -> EmbeddingModel:
         """Access the embedding model."""
         return self._embedding_model
+
+    @staticmethod
+    def _filter_cited_sources(
+        kb_response: KBResponse,
+        search_results: list[SearchResult],
+    ) -> list[SearchResult]:
+        """Keep only the search results that the research agent actually cited.
+
+        Uses substring matching on titles because the LLM may return a partial
+        or slightly different form of the source name (e.g. 'project_alpha.txt'
+        vs 'data/notes/project_alpha.txt').
+        """
+        if not kb_response.sources:
+            return []
+        cited_titles = [ref.title for ref in kb_response.sources]
+        cited_urls = {ref.url for ref in kb_response.sources if ref.url}
+
+        def _is_cited(r: SearchResult) -> bool:
+            if r.chunk.url and r.chunk.url in cited_urls:
+                return True
+            return any(t in r.chunk.source or r.chunk.source in t for t in cited_titles)
+
+        return [r for r in search_results if _is_cited(r)]
 
     def _validate_query(self, question: str) -> None:
         """Validate the user query before processing.
@@ -122,7 +145,8 @@ class OrchestratorAgent:
                     sources=[],
                 )
 
-        return QueryResult(answer=kb_response.answer, sources=search_results)
+        cited_sources = self._filter_cited_sources(kb_response, search_results)
+        return QueryResult(answer=kb_response.answer, sources=cited_sources)
 
     async def ask_async(
         self,
@@ -177,4 +201,5 @@ class OrchestratorAgent:
                     sources=[],
                 )
 
-        return QueryResult(answer=kb_response.answer, sources=search_results)
+        cited_sources = self._filter_cited_sources(kb_response, search_results)
+        return QueryResult(answer=kb_response.answer, sources=cited_sources)
