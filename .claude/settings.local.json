@@ -15,7 +15,8 @@
       "WebFetch(domain:docs.arize.com)",
       "WebFetch(domain:pypi.org)",
       "WebFetch(domain:github.com)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(sqlite3:*)"
     ]
   }
 }

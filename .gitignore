@@ -27,3 +27,5 @@ IMPLEMENTATION_PLAN.md
 data/sync_state.json
 
 .gemini_api_key
+
+*.sqlite-*
