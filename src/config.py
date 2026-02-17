@@ -45,6 +45,11 @@ class Settings(BaseSettings):
     # Conversation memory
     conversation_history_length: int = 10
 
+    # API
+    api_host: str = "0.0.0.0"
+    api_port: int = 8000
+    api_cors_origins: list[str] = ["http://localhost:*"]
+
     # Tracing
     tracing_enabled: bool = False
     phoenix_endpoint: str = "http://127.0.0.1:6006/v1/traces"

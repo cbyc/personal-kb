@@ -13,6 +13,8 @@ dependencies = [
     "opentelemetry-sdk",
     "opentelemetry-exporter-otlp",
     "trafilatura",
+    "fastapi",
+    "uvicorn",
 ]
 
 [project.optional-dependencies]

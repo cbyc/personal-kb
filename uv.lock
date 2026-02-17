@@ -2498,6 +2498,7 @@ name = "personal-kb"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
+    { name = "fastapi" },
     { name = "opentelemetry-exporter-otlp" },
     { name = "opentelemetry-sdk" },
     { name = "pydantic-ai" },
@@ -2506,6 +2507,7 @@ dependencies = [
     { name = "qdrant-client" },
     { name = "sentence-transformers" },
     { name = "trafilatura" },
+    { name = "uvicorn" },
 ]
 
 [package.optional-dependencies]
@@ -2519,6 +2521,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "arize-phoenix", marker = "extra == 'dev'" },
+    { name = "fastapi" },
     { name = "opentelemetry-exporter-otlp" },
     { name = "opentelemetry-sdk" },
     { name = "pydantic-ai" },
@@ -2530,6 +2533,7 @@ requires-dist = [
     { name = "ruff", marker = "extra == 'dev'" },
     { name = "sentence-transformers" },
     { name = "trafilatura" },
+    { name = "uvicorn" },
 ]
 provides-extras = ["dev"]
 
